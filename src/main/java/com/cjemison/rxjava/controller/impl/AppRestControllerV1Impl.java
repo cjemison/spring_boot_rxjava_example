@@ -41,8 +41,13 @@ public class AppRestControllerV1Impl implements AppRestController {
 
   @Override
   @RequestMapping(value = "/**", produces = MediaType.APPLICATION_JSON_UTF8_VALUE,
-        method = RequestMethod.GET)
-  public DeferredResult<ResponseEntity<?>> request(final HttpServletRequest request) throws
+        method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
+  public DeferredResult<ResponseEntity<?>> processRequestEvent(final HttpServletRequest request)
+        throws Exception {
+    return processEvent(request);
+  }
+
+  private DeferredResult<ResponseEntity<?>> processEvent(HttpServletRequest request) throws
         Exception {
     HttpRequestContext requestContext = service.buildHttpRequestContext(request);
     logger.trace("HttpRequestContext: {}", requestContext);
@@ -60,4 +65,5 @@ public class AppRestControllerV1Impl implements AppRestController {
     }
     return deferredResult;
   }
+
 }

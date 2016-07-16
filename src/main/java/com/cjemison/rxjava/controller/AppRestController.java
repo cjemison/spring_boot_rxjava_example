@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
  * Created by cjemison on 7/16/16.
  */
 public interface AppRestController {
-  DeferredResult<ResponseEntity<?>> request(final HttpServletRequest request)
+
+  DeferredResult<ResponseEntity<?>> processRequestEvent(final HttpServletRequest request)
         throws Exception;
 }
