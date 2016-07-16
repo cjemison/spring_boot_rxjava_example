@@ -23,6 +23,8 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import rx.Observable;
+
 /**
  * Created by cjemison on 7/16/16.
  */
@@ -51,14 +53,19 @@ public class AppRestControllerV1Impl implements AppRestController {
     HttpRequestContext requestContext = new HttpRequestContext(request);
     logger.trace("HttpRequestContext: {}", requestContext);
     DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>();
-    AbstractEvent<HttpRequestContext, DogPayload> event = new AbstractEvent<>(requestContext);
+    AbstractEvent<HttpRequestContext, DogPayload> event = new AbstractEvent<>
+          (requestContext);
     eventBus.post(event);
     if (event.getEventException() == null && event.getResponse() != null) {
-      event.getResponse().subscribe(c -> {
-        if (c.isPresent()) {
-          deferredResult.setResult(ResponseEntity.ok(c.get()));
+      event.getResponse().flatMap(a -> {
+        ResponseEntity<?> responseEntity;
+        if (a.isPresent()) {
+          responseEntity = ResponseEntity.ok(a.get());
+        } else {
+          responseEntity = ResponseEntity.notFound().build();
         }
-      });
+        return Observable.just(responseEntity);
+      }).subscribe(deferredResult::setResult);
     } else if (event.getEventException() != null) {
       throw event.getEventException().getException();
     } else {

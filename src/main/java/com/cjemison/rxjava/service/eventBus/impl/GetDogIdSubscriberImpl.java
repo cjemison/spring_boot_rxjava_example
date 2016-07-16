@@ -40,6 +40,7 @@ public class GetDogIdSubscriberImpl
   public void event(AbstractEvent<HttpRequestContext, DogPayload> event) {
     Assert.notNull(event);
     Assert.notNull(event.getPayload());
+    logger.debug("AbstractEvent: {}");
     HttpRequestContext context = event.getPayload();
     if (context.getRequest().getRequestURI().equals("/v1/dog/id")) {
       super.eventExecutor(event, event1 -> dogService.getRandomUUID());
