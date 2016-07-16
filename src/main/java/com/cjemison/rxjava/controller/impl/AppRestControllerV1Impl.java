@@ -5,7 +5,6 @@ import com.google.common.eventbus.EventBus;
 import com.cjemison.rxjava.controller.AppRestController;
 import com.cjemison.rxjava.controller.domain.DogPayload;
 import com.cjemison.rxjava.controller.domain.HttpRequestContext;
-import com.cjemison.rxjava.controller.service.RequestContextBuilder;
 import com.cjemison.rxjava.service.domain.AbstractEvent;
 
 import org.slf4j.Logger;
@@ -31,16 +30,12 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping(value = "/v1", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class AppRestControllerV1Impl implements AppRestController {
   private static final Logger logger = LoggerFactory.getLogger(AppRestControllerV1Impl.class);
-  private final RequestContextBuilder service;
-  private final EventBus eventBus;
 
   @Autowired
-  public AppRestControllerV1Impl(final RequestContextBuilder service, final EventBus eventBus) {
-    Assert.notNull(service);
-    Assert.notNull(eventBus);
-    this.eventBus = eventBus;
-    this.service = service;
-  }
+  private HttpServletRequest request;
+
+  @Autowired
+  private EventBus eventBus;
 
   @Override
   @RequestMapping(value = "/**", produces = MediaType.APPLICATION_JSON_UTF8_VALUE,
@@ -48,12 +43,12 @@ public class AppRestControllerV1Impl implements AppRestController {
   public DeferredResult<ResponseEntity<?>> processRequestEvent(final HttpServletRequest request)
         throws Exception {
     Assert.notNull(request);
-    return processEvent(request);
+    return processEvent();
   }
 
-  private DeferredResult<ResponseEntity<?>> processEvent(HttpServletRequest request) throws
+  private DeferredResult<ResponseEntity<?>> processEvent() throws
         Exception {
-    HttpRequestContext requestContext = service.buildHttpRequestContext(request);
+    HttpRequestContext requestContext = new HttpRequestContext(request);
     logger.trace("HttpRequestContext: {}", requestContext);
     DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>();
     AbstractEvent<HttpRequestContext, DogPayload> event = new AbstractEvent<>(requestContext);
