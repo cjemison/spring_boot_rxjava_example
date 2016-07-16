@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -44,6 +47,7 @@ public class AppRestControllerV1Impl implements AppRestController {
         method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
   public DeferredResult<ResponseEntity<?>> processRequestEvent(final HttpServletRequest request)
         throws Exception {
+    Assert.notNull(request);
     return processEvent(request);
   }
 
@@ -54,14 +58,19 @@ public class AppRestControllerV1Impl implements AppRestController {
     DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>();
     AbstractEvent<HttpRequestContext, DogPayload> event = new AbstractEvent<>(requestContext);
     eventBus.post(event);
-    if (event.getEventException() == null) {
+    if (event.getEventException() == null && event.getResponse() != null) {
       event.getResponse().subscribe(c -> {
         if (c.isPresent()) {
           deferredResult.setResult(ResponseEntity.ok(c.get()));
         }
       });
-    } else {
+    } else if (event.getEventException() != null) {
       throw event.getEventException().getException();
+    } else {
+      Map<String, String> map = new HashMap<>();
+      map.put("URI", request.getRequestURI());
+      map.put("message", "Bad Request");
+      deferredResult.setErrorResult(ResponseEntity.badRequest().body(map));
     }
     return deferredResult;
   }
