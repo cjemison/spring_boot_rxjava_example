@@ -1,5 +1,6 @@
 package com.cjemison.rxjava.service.eventBus.impl;
 
+import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
 import com.cjemison.rxjava.controller.domain.DogPayload;
@@ -25,11 +26,15 @@ public class GetDogIdSubscriberImpl
       implements GetDogIdSubscriber {
   private static final Logger logger = LoggerFactory.getLogger(GetDogIdSubscriberImpl.class);
   private final DogService dogService;
+  private final EventBus eventBus;
 
   @Autowired
-  public GetDogIdSubscriberImpl(final DogService dogService) {
+  public GetDogIdSubscriberImpl(final DogService dogService,
+                                final EventBus eventBus) {
     Assert.notNull(dogService);
     this.dogService = dogService;
+    this.eventBus = eventBus;
+    eventBus.register(this);
   }
 
   @Override
