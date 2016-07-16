@@ -15,7 +15,6 @@ public class WebConfig implements InitializingBean {
   @Bean
   public EventBus eventBus() {
     EventBus eventBus = new EventBus();
-    //eventBus.register(getDogIdSubscriber);
     return eventBus;
   }
 
