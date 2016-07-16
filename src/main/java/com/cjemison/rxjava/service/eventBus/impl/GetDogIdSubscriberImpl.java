@@ -13,6 +13,7 @@ import com.cjemison.rxjava.service.eventBus.GetDogIdSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -42,7 +43,8 @@ public class GetDogIdSubscriberImpl
     Assert.notNull(event.getPayload());
     logger.debug("AbstractEvent: {}");
     HttpRequestContext context = event.getPayload();
-    if (context.getRequest().getRequestURI().equals("/v1/dog/id")) {
+    if (context.getRequest().getRequestURI().equals("/v1/dog/id")
+          && context.getRequest().getMethod().equals(HttpMethod.GET.name())) {
       super.eventExecutor(event, event1 -> dogService.getRandomUUID());
     }
   }

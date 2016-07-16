@@ -45,12 +45,12 @@ public class AppRestControllerV1Impl implements AppRestController {
   public DeferredResult<ResponseEntity<?>> processRequestEvent(final HttpServletRequest request)
         throws Exception {
     Assert.notNull(request);
-    return processEvent();
+    HttpRequestContext requestContext = new HttpRequestContext(request);
+    return processEvent(requestContext);
   }
 
-  private DeferredResult<ResponseEntity<?>> processEvent() throws
+  private DeferredResult<ResponseEntity<?>> processEvent(HttpRequestContext requestContext) throws
         Exception {
-    HttpRequestContext requestContext = new HttpRequestContext(request);
     logger.trace("HttpRequestContext: {}", requestContext);
     DeferredResult<ResponseEntity<?>> deferredResult = new DeferredResult<>();
     AbstractEvent<HttpRequestContext, DogPayload> event = new AbstractEvent<>
